@@ -106,15 +106,17 @@
         	
 <%@ include file="../includes/footer.jsp" %>
 
+
+
+<!-- reply 관련 스트립트  -->
 <script type="text/javascript" src="/resources/js/reply.js"></script>
-<script >
-	
+<script>
 	$(document).ready(function(){
 		
-		var bnoValue = "<c:out value='${board.bno}'/>";
+		var bnoValue = '<c:out value="${board.bno}"/>';
 		var replyUL = $(".chat");
 		
-		showList(1);
+		/* showList(1);
 		
 		function showList(page){
 			replyService.getList({bno:bnoValue, page: page || 1}, function(list){
@@ -136,55 +138,59 @@
 				replyUL.html(str);
 			});
 		}
-		
+		 */		
 	});
-
-
-
-
-
+	
+	/********************** 
+	* ajax 댓글처리 테스트 (s) * 
+	***********************/
 	console.log("=========");
 	console.log("JS TEST");
 	
 	var bnoValue = '<c:out value="${board.bno}"/>';
 	console.log("bno: ", bnoValue);
 	
-	//for replyService add test
-	/* replyService.add(
+	/* 댓글 삽입 */
+	replyService.add(
 		{reply:"JS TEST", replyer: "tester", bno: bnoValue},
 		function(result){
 			alert("RESULT: "+ result);
-	});
-		
+		},
+		function(err){
+			alert("error: insert");
+		});
+	
+	/*  댓글 리스트 조회 */	
 	replyService.getList({bno:bnoValue, page: 1}, function(list){
-		for(var i=0, len=list.length||0; i<len; i++ ){
+		for(var i = 0, len = list.length || 0; i < len; i++ ){
 			console.log(list[i]);
 		}
 	});
-	*/
-	/*
-	replyService.remove(24, function(count){
-		console.log(count);
-		if(count === 'success'){
+	
+	/* 댓글 삭제 */
+	replyService.remove(24, function(result){
+		console.log(result);
+		if(result === 'success'){
 			alert("Removed");
 		}
 	}, function(err){
-		alert("Error");
+		alert("Error : remove");
 	}); 
 	
-	replyService.update({
-		rno: 22,
-		bno: bnoValue,
-		reply: "Modified Reply..."
-	}, function(result){
-		alert("수정 완료...");
+	/* 댓글 수정 */
+	replyService.update({rno: 54, bno: bnoValue, reply: "수정되고 있어??????????????????"}
+	, function(result){
+		console.log("update result: "+ result);
+		alert("수정 완료..." + result ); }
+	, function(err){
+		alert("Error : modify");
 	});
 	
-	
-	replyService.get(11, function(data){
-		console.log("data: ",data);
+	/* 단일 댓글 조회 */
+	replyService.get(42, function(data){
+		console.log("단일댓글 data: ",data);
 	});
-	*/
+
 </script>
 <script type="text/javascript">
 	$(document).ready(function(){

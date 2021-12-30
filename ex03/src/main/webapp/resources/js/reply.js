@@ -2,9 +2,10 @@ console.log("Reply Module...");
 
 var replyService = (function(){
 	
+	/* 댓글 삽입 */
 	function add(reply, callback, error){
 		console.log("add reply......");
-		
+
 		$.ajax({
 			type:'post',
 			url: '/replies/new',
@@ -23,6 +24,7 @@ var replyService = (function(){
 		});
 	}
 	
+	/* 리스트 조회 */
 	function getList(param, callback, error){
 		
 		var bno = param.bno;
@@ -41,6 +43,7 @@ var replyService = (function(){
 		});
 	}
 	
+	/* 삭제 */
 	function remove(rno, callback, error){
 		$.ajax({
 			type: 'delete',
@@ -58,20 +61,23 @@ var replyService = (function(){
 		});
 	}
 	
+	/* 댓글 수정 */
 	function update(reply, callback, error){
+		console.log("update in ajax : "+ reply);
+
 		$.ajax({
-			type: 'put',
-			url: "/replies/"+ reply.rno,
+			type:'put',
+			url: '/replies/'+ reply.rno,
 			data: JSON.stringify(reply),
 			contentType: "application/json; charset=utf-8",
 			success: function(result, status, xhr){
 				if(callback){
-					callback();
+					callback(result);
 				}
 			},
 			error: function(xhr, status, er){
 				if(error){
-					erroer();
+					error(er);
 				}
 			}
 		});
@@ -89,7 +95,7 @@ var replyService = (function(){
 			}
 		})
 	}
-	
+	/*
 	//날짜, 시간 표기법
 	function displayTime(timeValue){
 		
@@ -116,14 +122,14 @@ var replyService = (function(){
 			return [yy, '/', (mm > 9 ? '':'0')+mm, '/', (dd > 9 ? '':'0')+dd].join('');
 		}
 		
-	}
+	}*/
 	
 	return {
-		add:add,
+		add: add,
 		getList: getList,
 		remove: remove,
 		update: update,
-		get: get,
-		displayTime: displayTime
+		get: get/*,
+		displayTime: displayTime*/
 	};
 })(); //즉시실행함수 

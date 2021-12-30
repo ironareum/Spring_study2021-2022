@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j;
 @Log4j
 @AllArgsConstructor
 public class ReplyController {
-	private ReplyService service;
+	private ReplyService service; 
 	
 	@PostMapping(value ="/new"
 				,consumes ="application/json"
@@ -45,7 +45,7 @@ public class ReplyController {
 				,produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<List<ReplyVO>> getList(@PathVariable("bno") Long bno
 												,@PathVariable("page") int page){
-			log.info("getList......");
+			log.info("getList...... (pages) ");
 			Criteria cri = new Criteria(page,10);
 			log.info(cri);
 		return new ResponseEntity<>(service.getListWithPaging(cri, bno), HttpStatus.OK);	
@@ -61,8 +61,8 @@ public class ReplyController {
 	
 	@DeleteMapping(value="/{rno}", produces = {MediaType.TEXT_PLAIN_VALUE})
 	public ResponseEntity<String> remove( @PathVariable("rno") Long rno){
-		log.info("remove: "+rno);
-		return service.remove(rno) ==1 
+		log.info("remove rno is : "+rno);
+		return service.remove(rno) == 1 
 				? new ResponseEntity<> ("success", HttpStatus.OK)
 				: new ResponseEntity<> (HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -71,15 +71,14 @@ public class ReplyController {
 			, value="/{rno}"
 			, consumes = "application/json"
 			, produces = { MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> modify( 
-			@RequestBody ReplyVO vo,
-			@PathVariable("rno") Long rno){
-		
+	public ResponseEntity<String> modify(@RequestBody ReplyVO vo, @PathVariable("rno") Long rno){
 		vo.setRno(rno);
 		log.info("rno :" + rno);
 		log.info("modify : "+ vo);
+		int result = service.modify(vo);
+		log.info("update count: " + result);
 		
-		return service.modify(vo) == 1
+		return result == 1
 				? new ResponseEntity<> ("success", HttpStatus.OK)
 				: new ResponseEntity<> (HttpStatus.INTERNAL_SERVER_ERROR);
 	}
