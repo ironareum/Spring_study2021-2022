@@ -95,16 +95,13 @@ var replyService = (function(){
 			}
 		})
 	}
-	/*
+
 	//날짜, 시간 표기법
-	function displayTime(timeValue){
-		
-		var today = new Date();
-		
-		var gap = today.getTime() - timeValue;
-		
-		var dateObj = new Date(timeValue);
-		
+	function displayTime(timeValue){		
+		var today = new Date();		
+		var gap = today.getTime() - timeValue;	
+		//console.log("gap time: ", gap);	
+		var dateObj = new Date(timeValue);		
 		var str ="";
 		
 		//댓글 등록시간이 현재시간 기준으로 하루(24시간) 이내 이면
@@ -112,8 +109,9 @@ var replyService = (function(){
 			var hh = dateObj.getHours();
 			var mi = dateObj.getMinutes();
 			var ss = dateObj.getSeconds();
-			
+		
 			return [ (hh > 9 ? '':'0')+hh, ':', (mi > 9 ? '':'0')+mi, ':', (ss > 9 ? '':'0')+ss].join('');
+		
 		} else {
 			var yy = dateObj.getFullYear();
 			var mm = dateObj.getMonth();
@@ -121,15 +119,14 @@ var replyService = (function(){
 			
 			return [yy, '/', (mm > 9 ? '':'0')+mm, '/', (dd > 9 ? '':'0')+dd].join('');
 		}
-		
-	}*/
+	}
 	
 	return {
 		add: add,
 		getList: getList,
 		remove: remove,
 		update: update,
-		get: get/*,
-		displayTime: displayTime*/
+		get: get,
+		displayTime: displayTime
 	};
 })(); //즉시실행함수 

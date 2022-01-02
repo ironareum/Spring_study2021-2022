@@ -66,21 +66,26 @@ public class ReplyMapperTests {
 		ReplyVO vo =  mapper.read(targetRno);
 		
 		vo.setReply("Update Reply ");
-		
 		int count = mapper.update(vo);
-		
 		log.info("update count : " + count);
 		
 	}
 	
-	@Test
+	//@Test
 	public void testList() {
 		Criteria cri = new Criteria();
 		
 		//3145776L
 		List<ReplyVO> replies = mapper.getListWithPaging(cri, bnoArr[0]);
+		replies.forEach(reply -> log.info(reply));
+	}
+	
+	@Test
+	public void testList2() {
+		Criteria cri = new Criteria(2, 10);
+		List<ReplyVO> replies= mapper.getListWithPaging(cri, 3145776L);
 		
 		replies.forEach(reply -> log.info(reply));
-		
 	}
+	
 }
