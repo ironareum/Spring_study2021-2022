@@ -53,18 +53,6 @@ ALTER TABLE TBL_REPLY ADD CONSTRAINT PK_REPLY PRIMARY KEY(RNO);
 ALTER TABLE TBL_REPLY ADD CONSTRAINT FK_REPLY_BOARD
 FOREIGN KEY(BNO) REFERENCES TBL_BOARD (BNO);
 
-CREATE INDEX IDX_REPLY ON TBL_REPLY (BNO DESC, RNO DESC);
-
 select * from tbl_board where rownum <10 order by bno desc;
 
 select * from tbl_reply where bno = 3145776;
-
-select rno, bno, reply, replyer, replyDate, updatedate
-		from (
-			select /*+INDEX(tbl_reply idx_reply) */ 
-				rownum rn, rno, bno, reply, replyer, replyDate, updatedate
-			from tbl_reply
-			where bno = 3145776
-				  and rno > 0
-				  and rownum <= 20
-		) where rn < 11;
