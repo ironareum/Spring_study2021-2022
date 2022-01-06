@@ -16,15 +16,17 @@
 		<context:annotation-config></context:annotation-config>
 		
 		<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-			<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
-			<property name="username" value="book_ex"></property>
-			<property name="password" value="book_ex"></property>
-		</bean>
+        <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+        <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:xe"></property>
+        <property name="username" value="book_ex"></property>
+        <property name="password" value="book_ex"></property>
+        </bean>
+				
 		
-		<!-- HikariCP configuration -->
-		<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-			<constructor-arg ref="hikariConfig"></constructor-arg>
-		</bean>
+		<!--HikariCP Configration-->
+        <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg ref="hikariConfig"/>
+        </bean>
 		
 		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 			<property name="dataSource" ref="dataSource"></property>
