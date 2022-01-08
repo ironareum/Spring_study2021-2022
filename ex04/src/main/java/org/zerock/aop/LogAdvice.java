@@ -19,6 +19,11 @@ public class LogAdvice {
 	public void logBefore() {
 		log.info("===============");
 	}
+	
+	/*
+	 * @Before("execution(* org.zerock.service.Sample*Service.*(..))") public void
+	 * logBeforeTx() { log.info("=======Tx========"); }
+	 */
 
 	@Before("execution(* org.zerock.service.SampleService*.doAdd(String, String)) && args(str1, str2)")
 	public void logBeforeWithParam(String str1, String str2) {
