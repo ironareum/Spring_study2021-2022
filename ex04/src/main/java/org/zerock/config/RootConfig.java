@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.zerock.aop.LogAdvice;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -50,6 +51,10 @@ public class RootConfig {
 		return new DataSourceTransactionManager(dataSource());
 	}
 	
+//	@Bean
+//	public LogAdvice logAdvice() {
+//		return new LogAdvice();
+//	}
 	
 }
 
