@@ -58,7 +58,7 @@ ex00/
     └── pom.xml                                   => Maven이 사용하는 pom.xml
     
 ```
-- **Configuration: xml/java 2 versions** 
+- **Configuration: 2 versions(xml/java)** 
 *버전 변경 및 설정 추가*
 ```java
 //pom.xml
@@ -96,8 +96,7 @@ ex00/
 	<scope>provided</scope>
 </dependency>
 
-//https://projectlombok.org에서 jar파일 다운로드 
-//cmd: java -jar lombok.jar
+//https://projectlombok.org에서 jar파일 다운로드 (cmd: java -jar lombok.jar)
 //설치 완료 후 Eclipse 실행 경로에 lombok.jar 파일 추가된것 확인
 <!-- Lombok 라이브러리 : getter/setter, toString(), 생성자 메서드 자동 생성해줌 -->
 <dependency>
@@ -242,9 +241,9 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 - **의존성 주입(DI) 방식의 기본 개념** 
   
  	A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. <br>
-	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.<br>
-	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성)<br>
-	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 박식을 이용함.
+	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.
+	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성) 
+	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 방식을 이용함.
 ```java
 //Chef.java
 @Component //Component: 스프링 관리대상 표시
@@ -525,29 +524,52 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 ```
 
 ## Part2 스프링 MVC 설정
-### 1. 모델2와 스프링MVC
+### 1. 스프링 MVC의 기본구조
+//프로젝트 구동은 web.xml 부터 시작 
+//1. ContextLoaderListener (w/ context-param:root-context.xml) 
+//2. root-context.xml 읽음 (context에 bean 생성) 
+//3. DispatcherServlet 서블렛 설정 동작 (w/ init-param:servlet-context.xml)
+//4. servlet-context.xml 읽음 (웹 관련 처리 준비작업 진행 => 이 과정에서 등록된 Bean들은 기존에 만들어진 Bean들과 연동 됨)
+- **환경셋팅(pom.xml, root-context.xml, web.xml - java버전 Part1 셋팅과 동일)**
+*web.xml*
+```java
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-- **모델2 방식**
-      
-  심플하게 비지니스 로직과 화면(view)를 분리.<br> 
-  모델 2방식에서 사용자의 Request는 특별한 상황이 아닌 이상 먼저 Controller를 호출 => 데이터처리 => Response 할때 데이터를 View쪽으로 전달. <br>
-  모델 2방식에서는 Servlet API의 RequestDispatcher 등을 이용해서 직접 처리 (불편..) 
+	<!-- The definition of the Root Spring Container shared by all Servlets and Filters -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring/root-context.xml</param-value>
+	</context-param>
+	
+	<!-- Creates the Spring Container shared by all Servlets and Filters -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 
-- **스프링 MVC 방식** 
+	<!-- Processes application requests -->
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>
 
-  사용자의 Request는 Front-Controller인 DisplatcherServlet을 통해 처리 (일단 모든 Request는 DisparcherServelt이 받음)<br>
-  이후 HandlerMapping&HanlderAdapter(=Controller) => ViewResolver(=View)를 통해 처리
-  
-- **환경셋팅**
 ```
-//Part1 셋팅과 동일 +@ (pom.xml,
 
-
-```
-
-- Servlet 클래스 (Part2 Spring MVC)
-- **WebConfig 클래스**
-```
+*WebConfig 클래스*
+```java
 @Configuration
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer{
 	@Override
@@ -557,12 +579,12 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class[] {ServletConfig.class}; //Part1에서는 사용안함 (Web 연결시부터 사용)
+		return new Class[] {ServletConfig.class}; 
 	}
 
 	@Override
 	protected String[] getServletMappings() {
-		return new String[] {"/"}; //Part1에서는 사용안함 (Web 연결시부터 사용)
+		return new String[] {"/"}; 
 	}
 	
 	
@@ -573,26 +595,61 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	 
 }
 ```
+- **Servlet 클래스** (Part2 Spring MVC)
+```
+@EnableWebMvc
+@ComponentScan(basePackages = {"org.zerock.controller, org.zerock.exception"})
+public class ServletConfig implements WebMvcConfigurer{
 
-*web.xml*
-```java
-<servlet-name>appServlet</servlet-name>
-  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-  <init-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
-  </init-param>
-  <load-on-startup>1</load-on-startup>
-</servlet>
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		InternalResourceViewResolver bean= new InternalResourceViewResolver();
+		bean.setViewClass(JstlView.class);
+		bean.setPrefix("/WEB-INF/views/");
+		bean.setSuffix(".jsp");
+		registry.viewResolver(bean);
+	}
 
-<servlet-mapping>
-  <servlet-name>appServlet</servlet-name>
-  <url-pattern>/</url-pattern>
-</servlet-mapping>
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
+	}
+	
+	@Bean(name="multipartResolver")
+	public CommonsMultipartResolver getResolver() throws IOException {
+		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
+		
+		//10MB
+		resolver.setMaxUploadSize(1024*1024*10);
+		resolver.setMaxUploadSizePerFile(1024*1024*2);
+		resolver.setMaxInMemorySize(1024*1024);
+		
+		resolver.setUploadTempDir(new FileSystemResource("C:\\upload\\tmp"));
+		resolver.setDefaultEncoding("utf-8");
+		
+		return resolver;
+	}
+}
 ```
 
+
+- **모델2와 스프링MVC**
+```
+# 모델2 방식
+      
+  심플하게 비지니스 로직과 화면(view)를 분리.<br> 
+  모델 2방식에서 사용자의 Request는 특별한 상황이 아닌 이상 먼저 Controller를 호출 => 데이터처리 => Response 할때 데이터를 View쪽으로 전달. 
+  모델 2방식에서는 Servlet API의 RequestDispatcher 등을 이용해서 직접 처리 (불편..) 
+
+# 스프링 MVC 방식 
+
+  사용자의 Request는 Front-Controller인 DisplatcherServlet을 통해 처리 (일단 모든 Request는 DisparcherServelt이 받음)<br>
+  이후 HandlerMapping&HanlderAdapter(=Controller) => ViewResolver(=View)를 통해 처리
+  
 **Front-Contrller :**
 패턴을 이용하는 경우 모든 Request의 처리에 대한 분배가 정해진 방식대로만 동작하기 때문에 좀 더 엄격한 구조를 만들어 낼 수 있음.
+```  
+
 
 
 ## Part3 기본적인 웹 게시물 관리
