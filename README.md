@@ -58,7 +58,7 @@ ex00/
     └── pom.xml                                   => Maven이 사용하는 pom.xml
     
 ```
-- Configuration: xml/java 2 versions 
+- **Configuration: xml/java 2 versions** 
 *버전 변경 및 설정 추가*
 ```java
 //pom.xml
@@ -74,11 +74,11 @@ ex00/
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 	</properties>
   
-//java version 1.8
+<!-- Compile : java version 1.8 변경 -->
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
-    <version>3.5.1</version>
+    <version>2.5.1</version>
     <configuration>
         <source>1.8</source>
         <target>1.8</target>
@@ -88,11 +88,18 @@ ex00/
     </configuration>
 </plugin>
 
-//Lombok 라이브러리 : getter/setter, toString(), 생성자 자동 생성해줌
+<!-- Servlet : 3.1.0 이상 버전으로 변경-->
+<dependency>
+	<groupId>javax.servlet</groupId>
+	<artifactId>javax.servlet-api</artifactId>
+	<version>3.1.0</version>
+	<scope>provided</scope>
+</dependency>
+
 //https://projectlombok.org에서 jar파일 다운로드 
 //cmd: java -jar lombok.jar
 //설치 완료 후 Eclipse 실행 경로에 lombok.jar 파일 추가된것 확인
-<!-- lombok : setter/getter 메서드 자동생성 -->
+<!-- Lombok 라이브러리 : getter/setter, toString(), 생성자 메서드 자동 생성해줌 -->
 <dependency>
 	<groupId>org.projectlombok</groupId>
 	<artifactId>lombok</artifactId>
@@ -142,7 +149,7 @@ ex00/
 </dependency>
 ```
 
-- java Configuration의 경우
+- **java Configuration의 경우**
 ```
 <!-- web.xml/spring폴더(root-context.xml,servlet-context.xml) 삭제-->
 <!-- java Config 사용시 pom.xml 수정-->
@@ -157,34 +164,20 @@ ex00/
 
 <!-- java version 변경 -->
 <properties>
-		<java-version>1.8</java-version>
-		<org.springframework-version>5.0.7.RELEASE</org.springframework-version>
-
-<!-- Compile 변경 -->
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-compiler-plugin</artifactId>
-    <version>2.5.1</version>
-    <configuration>
-        <source>1.8</source>
-        <target>1.8</target>
-        <compilerArgument>-Xlint:all</compilerArgument>
-        <showWarnings>true</showWarnings>
-        <showDeprecation>true</showDeprecation>
-    </configuration>
-</plugin>
+	<java-version>1.8</java-version>
+	<org.springframework-version>5.0.7.RELEASE</org.springframework-version>
 
 <!-- java 설정 패키지 생성필요 (하단 참고) -->
 ```
-- RootConfig 클래스 (Part5 포함 버전)
+- **RootConfig 클래스 (Part5 포함 버전)**
 ```java
 @Configuration
 @ComponentScan(basePackages = {"org.zerock.service"})
-@ComponentScan(basePackages = {"org.zerock.aop"})
-@EnableAspectJAutoProxy
-//@EnableAspectautoProxy(proxyTargetClass=true)
-@EnableTransactionManagement
-@MapperScan(basePackages = {"org.zerock.mapper"})
+@ComponentScan(basePackages = {"org.zerock.aop"}) //part5
+@EnableAspectJAutoProxy //part5
+//@EnableAspectautoProxy(proxyTargetClass=true) //part5
+@EnableTransactionManagement //part5
+@MapperScan(basePackages = {"org.zerock.mapper"}) 
 public class RootConfig {
 	
 	@Bean
@@ -208,6 +201,7 @@ public class RootConfig {
 		return (SqlSessionFactory)sqlSessionFactory.getObject();
 	}
 	
+	//part5
 	@Bean
 	public DataSourceTransactionManager txManager() {
 		return new DataSourceTransactionManager(dataSource());
@@ -215,7 +209,7 @@ public class RootConfig {
 }
 ```
 
-- WebConfig 클래스 (Part5 포함 버전)
+- **WebConfig 클래스**
 ```
 @Configuration
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer{
@@ -226,12 +220,12 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class[] {ServletConfig.class};
+		return new Class[] {ServletConfig.class}; //Part1에서는 사용안함 (Web 연결시부터 사용)
 	}
 
 	@Override
 	protected String[] getServletMappings() {
-		return new String[] {"/"};
+		return new String[] {"/"}; //Part1에서는 사용안함 (Web 연결시부터 사용)
 	}
 	
 	
@@ -242,6 +236,7 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	 
 }
 ```
+
 
 ### 2. 스프링의 특징과 의존성 주입
 - **의존성 주입(DI) 방식의 기본 개념** 
@@ -532,17 +527,52 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 ## Part2 스프링 MVC 설정
 ### 1. 모델2와 스프링MVC
 
-- 모델2 방식
+- **모델2 방식**
       
   심플하게 비지니스 로직과 화면(view)를 분리.<br> 
   모델 2방식에서 사용자의 Request는 특별한 상황이 아닌 이상 먼저 Controller를 호출 => 데이터처리 => Response 할때 데이터를 View쪽으로 전달. <br>
   모델 2방식에서는 Servlet API의 RequestDispatcher 등을 이용해서 직접 처리 (불편..) 
 
-- 스프링 MVC 방식 
+- **스프링 MVC 방식** 
 
   사용자의 Request는 Front-Controller인 DisplatcherServlet을 통해 처리 (일단 모든 Request는 DisparcherServelt이 받음)<br>
   이후 HandlerMapping&HanlderAdapter(=Controller) => ViewResolver(=View)를 통해 처리
+  
+- **환경셋팅**
+```
+//Part1 셋팅과 동일 +@ (pom.xml,
 
+
+```
+
+- Servlet 클래스 (Part2 Spring MVC)
+- **WebConfig 클래스**
+```
+@Configuration
+public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer{
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		return new Class[] {RootConfig.class};
+	}
+
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		return new Class[] {ServletConfig.class}; //Part1에서는 사용안함 (Web 연결시부터 사용)
+	}
+
+	@Override
+	protected String[] getServletMappings() {
+		return new String[] {"/"}; //Part1에서는 사용안함 (Web 연결시부터 사용)
+	}
+	
+	
+  @Override 
+  protected void customizeRegistration(ServletRegistration.Dynamic
+  registration) {
+  registration.setInitParameter("throwExceptionIfNoHandlerFound", "true"); }
+	 
+}
+```
 
 *web.xml*
 ```java
