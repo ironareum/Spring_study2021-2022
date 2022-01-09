@@ -286,15 +286,15 @@ public class Restaurant {
 @ComponentScan(basePackages= {"org.zerock.sample"})
 public class RootConfig {
 ```
--**스프링 동작과정**
+- **스프링 동작과정**
 
-Spring 시작(spring 메모리 영역 생성 = Context)) <br>
-=> Spring의 컨텍스트(ApplicationContext 객체 생성) <br>
-=> Spring이 생성하고 관리해야하는 객체 설정 확인 @root-context.xml (context:component-scan 을 통해 패키지 스캔)<br>
-=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) <br>
-=> 이후 @Autowired 어노테이션 확인 후 객체 
+	Spring 시작(spring 메모리 영역 생성 = Context)) <br>
+	=> Spring의 컨텍스트(ApplicationContext 객체 생성) <br>
+	=> Spring이 생성하고 관리해야하는 객체 설정 확인 @root-context.xml (context:component-scan 을 통해 패키지 스캔)<br>
+	=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) <br>
+	=> 이후 @Autowired 어노테이션 확인 후 객체 
 
--**단위테스트 진행**
+- **단위테스트 진행**
 ```
 //src/test/java/org.zerock.sample
 //SampleTests.java
@@ -333,8 +333,8 @@ GRANT CONNECT, DBA BOOK_EX;
 
 - **커넥션풀 설정(Hikari-CP)**
 
-여러명의 사용자를 동시에 처리해야 하는 웹 애플리케이션의 경우 데이터베이스 연결을 이용할 때는 커넥션 풀을 이용.<br>
-Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사용함. (매번 데이터베이스와 연결하는방식이 아닌, 미리 연결을 맺어주고 반환하는 구조로 성능향상)
+	여러명의 사용자를 동시에 처리해야 하는 웹 애플리케이션의 경우 데이터베이스 연결을 이용할 때는 커넥션 풀을 이용.<br>
+	Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사용함. (매번 데이터베이스와 연결하는방식이 아닌, 미리 연결을 맺어주고 반환하는 구조로 성능향상)
 ```java
 //pom.xml
 //HikariCP사용
@@ -508,7 +508,7 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 	}
 ```
 
--**로그레벨 변경**
+- **로그레벨 변경**
 ```java
 //log4j.xml 파일 (src/main/resources 또는 src/test/resources)
 //value 부분 수정: info/warn
