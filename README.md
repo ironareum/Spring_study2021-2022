@@ -246,9 +246,9 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 ### 2. 스프링의 특징과 의존성 주입
 - **의존성 주입(DI) 방식의 기본 개념** 
   
- 	A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. 
-	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.
-	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성)
+ 	A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. <br>
+	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.<br>
+	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성)<br>
 	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 박식을 이용함.
 ```java
 //Chef.java
@@ -288,10 +288,10 @@ public class RootConfig {
 ```
 -**스프링 동작과정**
 
-Spring 시작(spring 메모리 영역 생성 = Context)) 
-=> Spring의 컨텍스트(ApplicationContext 객체 생성) 
-=> Spring이 생성하고 관리해야하는 객체 설정 확인 @root-context.xml (context:component-scan 을 통해 패키지 스캔)
-=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) 
+Spring 시작(spring 메모리 영역 생성 = Context)) <br>
+=> Spring의 컨텍스트(ApplicationContext 객체 생성) <br>
+=> Spring이 생성하고 관리해야하는 객체 설정 확인 @root-context.xml (context:component-scan 을 통해 패키지 스캔)<br>
+=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) <br>
 => 이후 @Autowired 어노테이션 확인 후 객체 
 
 -**단위테스트 진행**
@@ -318,7 +318,7 @@ public class SampleTests {
 
 - **AOP의 지원**
 
-	대부분의 시스템이 **공통**으로 가지고 있는 보안이나, 로그, 트랜잭션과 같이 비즈니스 로직은 아니지만, 반드시 처리가 필요한 부분을 스프링에서는 횡단관심사(cross-confern)이라고 하며, AOP를 이용하면 이러한 욍단 관심사를 모듈로 분리해서 제작하는것이 가능하다.
+	대부분의 시스템이 **공통**으로 가지고 있는 **보안이나, 로그, 트랜잭션**과 같이 비즈니스 로직은 아니지만, 반드시 처리가 필요한 부분을 스프링에서는 **횡단관심사(cross-confern)** 이라고 하며, AOP를 이용하면 이러한 욍단 관심사를 모듈로 분리해서 제작하는것이 가능하다.
 
 
 ### 3. 스프링과 Orable DataBase 연동 
@@ -331,8 +331,9 @@ TEMPORARY TABLESPACE TEMP;
 GRANT CONNECT, DBA BOOK_EX;
 ```
 
-- **커넥션풀 설정, Hikari-CP**
-여러명의 사용자를 동시에 처리해야 하는 웹 애플리케이션의 경우 데이터베이스 연결을 이용할 때는 커넥션 풀을 이용.
+- **커넥션풀 설정(Hikari-CP)**
+
+여러명의 사용자를 동시에 처리해야 하는 웹 애플리케이션의 경우 데이터베이스 연결을 이용할 때는 커넥션 풀을 이용.<br>
 Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사용함. (매번 데이터베이스와 연결하는방식이 아닌, 미리 연결을 맺어주고 반환하는 구조로 성능향상)
 ```java
 //pom.xml
@@ -346,44 +347,187 @@ Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사
 ```
 ```java
 //root-context.xml
+<--! 커넥션 풀 생성 (s) : log4jjdbc 사용시 driver & url 변경예정 -->
+<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+	<property name="driverClassName" 
+	value="oracle.jdbc.driver.OracleDriver"></property> 
+	<property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"></property>
+	<property name="username" value="book_ex"></property>
+	<property name="password" value="book_ex"></property>
+</bean>	
+
+<!-- HikariCP Configuration -->
+<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+	<constructor-arg ref="hikariConfig"></constructor-arg>
+</bean>
+<--! 커넥션 풀 생성 (e) -->
+
+<context:component-scan base-package="org.zerock.sample"></context:component-scan>
+
+
+//RootConfig.java
 @Configuration
-@ComponentScan(basePackages = {"org.zerock.service"})
-@ComponentScan(basePackages = {"org.zerock.aop"})
-@EnableAspectJAutoProxy
-//@EnableAspectautoProxy(proxyTargetClass=true)
-@EnableTransactionManagement
-@MapperScan(basePackages = {"org.zerock.mapper"})
+@ComponentScan(basePackages = {"org.zerock.sample"})
 public class RootConfig {
 	
+	//Connection Pool 생성(s)
 	@Bean
 	public DataSource dataSource() {
-		
 		HikariConfig hikariConfig = new HikariConfig();
-		
-		hikariConfig.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy");
-		hikariConfig.setJdbcUrl("jdbc:log4jdbc:oracle:thin:@localhost:1521:xe");
+		hikariConfig.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+		hikariConfig.setJdbcUrl("jdbc:oracle:thin:@localhost:1521:XE");
 		hikariConfig.setUsername("book_ex");
 		hikariConfig.setPassword("book_ex");
 		
 		HikariDataSource dataSource = new HikariDataSource(hikariConfig);
 		return dataSource;
 	}
+}	
 	
+```
+### 4. Mybatis와 스프링 연동 (Mybatis, SQLSessionFatory, Mapper)
+- **Mybatis 설정**
+```
+//pom.xml
+
+//mybatis/mybatis-spring: MyBatis와 스프링 연동 라이브러리 
+<!-- Mybatis -->
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+    <version>3.4.6</version>
+</dependency>
+
+<!-- Mybatis-spring -->
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>1.3.2</version>
+</dependency>
+
+//spring-jdbc/spring-tx: 스프링에서 데이터베이스 처리와 트랜잭션 처리(없으면 에러남)
+<!-- Spring-tx -->
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-tx</artifactId>
+	<version>${org.springframework-version}</version>
+</dependency>
+
+<!-- Spring-jdbc -->
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-jdbc</artifactId>
+	<version>${org.springframework-version}</version>
+</dependency>
+
+```
+
+- **SQLSessionFactory 생성 (SQLSession 을 통해 Connection 생성 > 원하는 SQL 전달 > 결과를 리턴 받음)**
+```java
+//root-context.xml
+
+<--!  Mybatis: SQLSessionFatory 생성 (s) -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="dataSource"></property>
+</bean>
+<--! Mybatis: SQLSessionFatory 생성 (e) -->
+
+<--!  Mybatis: Mapper 설정으로 SQL 설정 분리 & 자동처리방식 가능 (s) -->
+<mybatis-spring:scan base-package="org.zerock.mapper"/>
+<--!  Mybatis: Mapper 설정으로 SQL 설정 분리 & 자동처리방식 가능 (e) -->
+
+
+//RootConfig.java
+@Configuration
+@ComponentScan(basePackages = {"org.zerock.sample"})
+@MapperScan(basePackages = {"org.zerock.mapper"}) //Mybatis: Mapper 설정으로 SQL 설정 분리 & 자동처리방식 가능
+public class RootConfig {
+	
+	//(MyBatis에서 나올)SQLSessionFactory 생성
 	@Bean
 	public SqlSessionFactory sqlSessionFactory() throws Exception {
 		SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
 		sqlSessionFactory.setDataSource(dataSource());
 		return (SqlSessionFactory)sqlSessionFactory.getObject();
 	}
-	
-	@Bean
-	public DataSourceTransactionManager txManager() {
-		return new DataSourceTransactionManager(dataSource());
+```
+
+- **sql.xml 파일 생성**
+```java
+//src/main/resources/
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org//dtd/mybatis-3-mapper.dtd">
+//namespace 는 interface Mapper 클래스명과 동일하게 설정.
+<mapper namespace="org.zerock.mapper.TimeMapper">
+	<select id="getTime2" resultType="string">
+		SELECT sysdate FROM dual
+	</select>
+</mapper>
+```
+
+- **log4jdbc-log4j2 (SQL로그) 설정**
+```java
+//pom.xml
+<!-- log4jdbc-log4j2-jdbc4 (SQL로그)-->
+<dependency>
+    <groupId>org.bgee.log4jdbc-log4j2</groupId>
+    <artifactId>log4jdbc-log4j2-jdbc4</artifactId>
+    <version>1.16</version>
+</dependency>
+```
+```java
+//src/main/resources/log4jdbc.log4j2.properties 파일 추가
+log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
+```
+```java
+//root-context.xml
+//log4jdbc를 이용하는 경우 JDBC Driver와 URL 정보 수정필요
+<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		//<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property> 
+		//<property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"></property>
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+		<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:XE"></property>
+		<property name="username" value="book_ex"></property>
+		<property name="password" value="book_ex"></property>
+	</bean>	
+
+//RootConfig.java
+@Bean
+	public DataSource dataSource() {
+		HikariConfig hikariConfig = new HikariConfig();
+		
+		hikariConfig.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy"); //변경
+		hikariConfig.setJdbcUrl("jdbc:log4jdbc:oracle:thin:@localhost:1521:xe");  //변경
+		hikariConfig.setUsername("book_ex");
+		hikariConfig.setPassword("book_ex");
+		
+		HikariDataSource dataSource = new HikariDataSource(hikariConfig);
+		return dataSource;
 	}
 ```
-### 4. Mybatis와 스프링 연동 
-- log4jdbc-log4j2 
 
+-**로그레벨 변경**
+```java
+//log4j.xml 파일 (src/main/resources 또는 src/test/resources)
+//value 부분 수정: info/warn
+<!-- Root Logger -->
+<root>
+	<priority value="warn" />
+	<appender-ref ref="console" />
+</root>
+//필요시 추가 logger 작성으로 조절 가능 
+<logger name="jdbc.audit">
+	<level value="warn" />
+</logger>
+<logger name="jdbc.resultset">
+	<level value="warn" />
+</logger>
+<logger name="jdbc.connection">
+	<level value="warn" />
+</logger>
+```
 
 ## Part2 스프링 MVC 설정
 ### 1. 모델2와 스프링MVC
