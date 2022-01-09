@@ -251,6 +251,7 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성)
 	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 박식을 이용함.
 ```java
+//Chef.java
 @Component //Component: 스프링 관리대상 표시
 @Data //Data: Lombok의 setter/getter/toString/생성자 자동생성
 public class Chef {
@@ -258,6 +259,7 @@ public class Chef {
 }
 ```
 ```java
+//Restaurant.java
 @Component
 @Data
 public class Restaurant {
@@ -294,6 +296,8 @@ Spring 시작(spring 메모리 영역 생성 = Context))
 
 -**단위테스트 진행**
 ```
+//src/test/java/org.zerock.sample
+//SampleTests.java
 @RunWith(SpringJUnit4ClassRunner.class) //현재 테스트 코드가 스프링을 실행하는 역할 표시
 @ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml") //중요
 //@ContextConfiguration(classes = RootConfig.class)
@@ -318,9 +322,65 @@ public class SampleTests {
 
 
 ### 3. 스프링과 Orable DataBase 연동 
+- **계정생성**
+```
+CREATE USER book_ex IDENTIFIED BY book_ex
+DEFAULT TABLESPACE USERS
+TEMPORARY TABLESPACE TEMP;
 
-- 커넥션풀 설정, Hikari-CP
+GRANT CONNECT, DBA BOOK_EX;
+```
 
+- **커넥션풀 설정, Hikari-CP**
+여러명의 사용자를 동시에 처리해야 하는 웹 애플리케이션의 경우 데이터베이스 연결을 이용할 때는 커넥션 풀을 이용.
+Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사용함. (매번 데이터베이스와 연결하는방식이 아닌, 미리 연결을 맺어주고 반환하는 구조로 성능향상)
+```java
+//pom.xml
+//HikariCP사용
+<!-- HikariCP -->
+<dependency>
+    <groupId>com.zaxxer</groupId>
+    <artifactId>HikariCP</artifactId>
+    <version>2.7.8</version>
+</dependency>
+```
+```java
+//root-context.xml
+@Configuration
+@ComponentScan(basePackages = {"org.zerock.service"})
+@ComponentScan(basePackages = {"org.zerock.aop"})
+@EnableAspectJAutoProxy
+//@EnableAspectautoProxy(proxyTargetClass=true)
+@EnableTransactionManagement
+@MapperScan(basePackages = {"org.zerock.mapper"})
+public class RootConfig {
+	
+	@Bean
+	public DataSource dataSource() {
+		
+		HikariConfig hikariConfig = new HikariConfig();
+		
+		hikariConfig.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy");
+		hikariConfig.setJdbcUrl("jdbc:log4jdbc:oracle:thin:@localhost:1521:xe");
+		hikariConfig.setUsername("book_ex");
+		hikariConfig.setPassword("book_ex");
+		
+		HikariDataSource dataSource = new HikariDataSource(hikariConfig);
+		return dataSource;
+	}
+	
+	@Bean
+	public SqlSessionFactory sqlSessionFactory() throws Exception {
+		SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
+		sqlSessionFactory.setDataSource(dataSource());
+		return (SqlSessionFactory)sqlSessionFactory.getObject();
+	}
+	
+	@Bean
+	public DataSourceTransactionManager txManager() {
+		return new DataSourceTransactionManager(dataSource());
+	}
+```
 ### 4. Mybatis와 스프링 연동 
 - log4jdbc-log4j2 
 
