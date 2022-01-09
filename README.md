@@ -194,10 +194,16 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	 
 }
 ```
-### 2. 스프링과 Orable DataBase 연동 
+### 2. 스프링의 특징과 의존성 주입
+- 의존성 주입(DI) 방식의 기본 개념: A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. 
+	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.
+	
+	
+
+### 3. 스프링과 Orable DataBase 연동 
 - 커넥션풀 설정, Hikari-CP
 
-### 3. Mybatis와 스프링 연동 
+### 4. Mybatis와 스프링 연동 
 - log4jdbc-log4j2 
 
 
