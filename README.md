@@ -92,6 +92,54 @@ ex00/
 //https://projectlombok.org에서 jar파일 다운로드 
 //cmd: java -jar lombok.jar
 //설치 완료 후 Eclipse 실행 경로에 lombok.jar 파일 추가된것 확인
+<!-- lombok : setter/getter 메서드 자동생성 -->
+<dependency>
+	<groupId>org.projectlombok</groupId>
+	<artifactId>lombok</artifactId>
+	<version>1.18.0</version>
+	<scope>provided</scope>
+</dependency>
+
+<!-- add test lib : 스프링 동작 테스트-->
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-test</artifactId>
+	<version>${org.springframework-version}</version>
+</dependency>
+
+<!-- log4j 추가. 1.2.15 -> 1.2.17 버전으로 변경 -->
+<dependency>
+	<groupId>log4j</groupId>
+	<artifactId>log4j</artifactId>
+	<version>1.2.17</version>
+	<exclusions>
+		<exclusion>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</exclusion>
+		<exclusion>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms</artifactId>
+		</exclusion>
+		<exclusion>
+			<groupId>com.sun.jdmk</groupId>
+			<artifactId>jmxtools</artifactId>
+		</exclusion>
+		<exclusion>
+			<groupId>com.sun.jmx</groupId>
+			<artifactId>jmxri</artifactId>
+		</exclusion>
+	</exclusions>
+	<!-- <scope>runtime</scope> -->
+</dependency>
+
+<!-- java Test 사용시 단위테스트  (spring-test모듈로 스프링 가동 후) : Junit 버전 반드시 4.10이상 사용 -->
+<dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.12</version>
+	<scope>test</scope>
+</dependency>
 ```
 
 - java Configuration의 경우
@@ -194,13 +242,83 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	 
 }
 ```
+
 ### 2. 스프링의 특징과 의존성 주입
-- 의존성 주입(DI) 방식의 기본 개념: A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. 
+- **의존성 주입(DI) 방식의 기본 개념** 
+  
+ 	A는 B가 필요하다는 신호만 보내고, B객체를 주입하는것은 외부에서 이루어지는 방식. 
 	DI를 사용하려면 A,B외에 바깥쪽에 추가적인 하나의 존재가 필요(=Application Context)하며, 이 존재는 의존성이 필요한 객체(A)에 필요한 객체(B)를 찾아서 '주입'하는 역할을 함.
+	따라서 스프링을 이용하면 기존의 프로그래밍과 달리 객체와 객체를 분리해서 생성하고, 이러한 객체들을 엮는 작업을 하는 형태의 개발을 하게됨. (=Bean 생성)
+	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 박식을 이용함.
+```java
+@Component //Component: 스프링 관리대상 표시
+@Data //Data: Lombok의 setter/getter/toString/생성자 자동생성
+public class Chef {
 	
+}
+```
+```java
+@Component
+@Data
+public class Restaurant {
+	@Setter(onMethod_ = @Autowired) //Setter 어노테이션으로 아래 setChef 메소드 없어도 컴파일시 자동생성됨 
+	private Chef chef;
+
+	/*
+	 * public Chef getChef() { return chef; }
+	 * 
+	 * public void setChef(Chef chef) { this.chef = chef; }
+	 */
+}
+```
+- **의존성 주입 설정**
+
+```java
+//root-context.xml
+//NameSpaces 탭 > context 항목 체크 > 아래내용 추가 > Beans Graph 확인(Bean 객체 생성)
+	<context:component-scan base-package="org.zerock.sample"></context:component-scan>	
+</beans>
+
+//RootConfig.java
+@Configuration
+@ComponentScan(basePackages= {"org.zerock.sample"})
+public class RootConfig {
+```
+-**스프링 동작과정**
+
+Spring 시작(spring 메모리 영역 생성 = Context)) 
+=> Spring의 컨텍스트(ApplicationContext 객체 생성) 
+=> Spring이 생성하고 관리해야하는 객체 설정 확인 @root-context.xml (context:component-scan 을 통해 패키지 스캔)
+=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) 
+=> 이후 @Autowired 어노테이션 확인 후 객체 
+
+-**단위테스트 진행**
+```
+@RunWith(SpringJUnit4ClassRunner.class) //현재 테스트 코드가 스프링을 실행하는 역할 표시
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml") //중요
+//@ContextConfiguration(classes = RootConfig.class)
+@Log4j //Lombok을 이용해서 로그를 기록하는 Logger를 변수로 생성. 
+public class SampleTests {
+	@Setter(onMethod_ = {@Autowired})
+	private Restaurant restaurant;
 	
+	@Test //JUnit 테스트 대상 
+	public void testExist(){
+		assertNotNull(restaurant);
+		log.info(restaurant);
+		log.info("------------------");
+		log.info(restaurant.getChef());
+	}
+}
+```
+
+- **AOP의 지원**
+
+	대부분의 시스템이 **공통**으로 가지고 있는 보안이나, 로그, 트랜잭션과 같이 비즈니스 로직은 아니지만, 반드시 처리가 필요한 부분을 스프링에서는 횡단관심사(cross-confern)이라고 하며, AOP를 이용하면 이러한 욍단 관심사를 모듈로 분리해서 제작하는것이 가능하다.
+
 
 ### 3. 스프링과 Orable DataBase 연동 
+
 - 커넥션풀 설정, Hikari-CP
 
 ### 4. Mybatis와 스프링 연동 
