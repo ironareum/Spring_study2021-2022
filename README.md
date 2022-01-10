@@ -58,9 +58,9 @@ ex00/
     └── pom.xml                                   => Maven이 사용하는 pom.xml
     
 ```
-- **Configuration: 2 versions(xml/java)** 
+- **Configuration 버전 변경 및 설정 추가** 2 version(xml/java) 
 
-*pom.xml 버전 변경 및 설정 추가*
+	*pom.xml*
 ```java
 //pom.xml
 // 스프링 프레임워크 버전은 3.1.1로 생성되므로 예제는 5.0.7 버전으로 수정
@@ -149,8 +149,9 @@ ex00/
 </dependency>
 ```
 
-- *java Configuration의 경우*
-```
+- **java Configuration으로 설정하는 경우** 
+```java
+//pom.xml
 <!-- web.xml/spring폴더(root-context.xml,servlet-context.xml) 삭제-->
 <!-- java Config 사용시 pom.xml 수정-->
 <plugin>
@@ -169,7 +170,7 @@ ex00/
 
 <!-- java 설정 패키지 생성필요 (하단 참고) -->
 ```
-- **RootConfig 클래스 (Part5 포함 버전)**
+- **RootConfig.java (Part5 포함 버전)** 
 ```java
 @Configuration
 @ComponentScan(basePackages = {"org.zerock.service"})
@@ -209,7 +210,7 @@ public class RootConfig {
 }
 ```
 
-- **WebConfig 클래스**
+- **WebConfig.java**
 ```
 @Configuration
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer{
@@ -247,6 +248,7 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	ApplicationContext가 관리하는 객체들을 'Bean'으로 부르고, 빈과 빈 사이의 의존관계를 처리하는 방식으로 XML 설정, 어노테이션 설정, Java 설정 방식을 이용함.
 ```java
 //Chef.java
+
 @Component //Component: 스프링 관리대상 표시
 @Data //Data: Lombok의 setter/getter/toString/생성자 자동생성
 public class Chef {
@@ -255,6 +257,7 @@ public class Chef {
 ```
 ```java
 //Restaurant.java
+
 @Component
 @Data
 public class Restaurant {
@@ -272,15 +275,20 @@ public class Restaurant {
 
 ```java
 //root-context.xml
+
 //NameSpaces 탭 > context 항목 체크 > 아래내용 추가 > Beans Graph 확인(Bean 객체 생성)
 	<context:component-scan base-package="org.zerock.sample"></context:component-scan>	
 </beans>
 
+
+
 //RootConfig.java
+
 @Configuration
 @ComponentScan(basePackages= {"org.zerock.sample"})
 public class RootConfig {
 ```
+
 - **스프링 동작과정**
 
 	Spring 시작(spring 메모리 영역 생성 = Context)) <br>
@@ -289,10 +297,12 @@ public class RootConfig {
 	=> 해당 패키지에 있는 클래스 중 @Component 어노테이션 존재하는 클래스의 인스턴스 생성 (Bean 생성) <br>
 	=> 이후 @Autowired 어노테이션 확인 후 객체 
 
+
 - **단위테스트 진행**
 ```
 //src/test/java/org.zerock.sample
 //SampleTests.java
+
 @RunWith(SpringJUnit4ClassRunner.class) //현재 테스트 코드가 스프링을 실행하는 역할 표시
 @ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml") //중요
 //@ContextConfiguration(classes = RootConfig.class)
@@ -309,11 +319,13 @@ public class SampleTests {
 		log.info(restaurant.getChef());
 	}
 }
+
 ```
 
 - **AOP의 지원**
 
 	대부분의 시스템이 **공통**으로 가지고 있는 **보안이나, 로그, 트랜잭션**과 같이 비즈니스 로직은 아니지만, 반드시 처리가 필요한 부분을 스프링에서는 **횡단관심사(cross-confern)** 이라고 하며, AOP를 이용하면 이러한 욍단 관심사를 모듈로 분리해서 제작하는것이 가능하다.
+
 
 
 ### 3. 스프링과 Orable DataBase 연동 
@@ -332,6 +344,7 @@ GRANT CONNECT, DBA BOOK_EX;
 	Java에서는 DataSource라는 인터페이스를 통해서 커넥션 풀을 사용함. (매번 데이터베이스와 연결하는방식이 아닌, 미리 연결을 맺어주고 반환하는 구조로 성능향상)
 ```java
 //pom.xml
+
 //HikariCP사용
 <!-- HikariCP -->
 <dependency>
@@ -340,8 +353,10 @@ GRANT CONNECT, DBA BOOK_EX;
     <version>2.7.8</version>
 </dependency>
 ```
+
 ```java
 //root-context.xml
+
 <--! 커넥션 풀 생성 (s) : log4jjdbc 사용시 driver & url 변경예정 -->
 <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 	<property name="driverClassName" 
@@ -361,6 +376,7 @@ GRANT CONNECT, DBA BOOK_EX;
 
 
 //RootConfig.java
+
 @Configuration
 @ComponentScan(basePackages = {"org.zerock.sample"})
 public class RootConfig {
@@ -433,6 +449,7 @@ public class RootConfig {
 
 
 //RootConfig.java
+
 @Configuration
 @ComponentScan(basePackages = {"org.zerock.sample"})
 @MapperScan(basePackages = {"org.zerock.mapper"}) //Mybatis: Mapper 설정으로 SQL 설정 분리 & 자동처리방식 가능
@@ -450,6 +467,7 @@ public class RootConfig {
 - **sql.xml 파일 생성**
 ```java
 //src/main/resources/
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper 
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
@@ -506,7 +524,9 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 - **로그레벨 변경**
 ```java
 //log4j.xml 파일 (src/main/resources 또는 src/test/resources)
+
 //value 부분 수정: info/warn
+
 <!-- Root Logger -->
 <root>
 	<priority value="warn" />
@@ -526,6 +546,7 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 <br>
 <br>
 ## Part2 스프링 MVC 설정
+
 ### 1. 스프링 MVC의 기본구조
 //프로젝트 구동은 
 //0. **web.xml** 부터 시작 
@@ -534,34 +555,15 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 //3. **DispatcherServlet**에서 서블렛 설정 동작 (w/ XmlApplicationContext를 이용해서 init-param:servlet-context.xml 로딩) //제일중요!! 웹관련 처리 준비작업!!
 //4. **servlet-context.xml** 설정 읽음 (웹 관련 처리 준비작업 진행(설정:ViewResolver, ResourceHandlers. Bean생성: MultipartResolver & Controller) => 이 과정에서 등록된 Bean들은 기존에 만들어진 Bean들과 연동 됨)
 
-- **환경셋팅(pom.xml, root-context.xml, web.xml - java버전 Part1 셋팅과 동일)**
-*WebConfig 클래스*
-```java
-@Configuration
-public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer{
-	@Override
-	protected Class<?>[] getRootConfigClasses() {
-		return new Class[] {RootConfig.class};
-	}
 
-	@Override
-	protected Class<?>[] getServletConfigClasses() {
-		return new Class[] {ServletConfig.class}; 
-	}
+- **환경셋팅**
+- 	*pom.xml, root-context.xml, web.xml - java버전 Part1 셋팅과 동일*
 
-	@Override
-	protected String[] getServletMappings() {
-		return new String[] {"/"}; 
-	}
-		
-  @Override 
-  protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-  registration.setInitParameter("throwExceptionIfNoHandlerFound", "true"); }
-	 
-}
-```
 - **Servlet 클래스** (Part2 Spring MVC)
 ```
+
+
+//ServletConfig.java
 @EnableWebMvc
 @ComponentScan(basePackages = {"org.zerock.controller, org.zerock.exception"})
 public class ServletConfig implements WebMvcConfigurer{
@@ -611,10 +613,16 @@ public class ServletConfig implements WebMvcConfigurer{
   사용자의 Request는 Front-Controller인 DisplatcherServlet을 통해 처리 (일단 모든 Request는 DisparcherServelt이 받음)<br>
   이후 HandlerMapping&HanlderAdapter(=Controller) => ViewResolver(=View)를 통해 처리
   
+  1. 모든 Request는 DispatcherServlet(Front-Contrller)이 받음 @web.xml 설정 참고
+  2. HandlerMapping은 Request의 처리를 담당하는 컨트롤러를 찾기위해 존재 (이 중 RequestMappingHandlerMapping은 @RequestMapping 어노테이션이 적용 된것을 기준으로 판단함)
+  3. 적절한 컨트롤러가 찾아졌다면 HandlerAdapter를 이용해서 해당 컨트롤러를 동작시킴
+  4. Controller는 실제 Request를 처리하는 로직을 작성 (View에 전달해야 하는 데이터는 주로 Model에 담아서 전달. Controller는 다양한 타입의 결과를 반환하는데 이에대한 처리는 ViewResoler를 이용)
+  5. ViewResoler는 Controller가 반환한 결과를 어떤 View를 통해서 처리할지 해석하는 역할 @servlet-context.xml 설정 참고 
+  6. View는 실제로 응답 보내야 하는 데이터를 Jsp 등을 이용해서 생성하는 역할 (만들어진 응답은 DisparcherServlet을 통해 전송됨)
+  
 **Front-Contrller :**
 패턴을 이용하는 경우 모든 Request의 처리에 대한 분배가 정해진 방식대로만 동작하기 때문에 좀 더 엄격한 구조를 만들어 낼 수 있음.
 ```  
-
 
 
 ## Part3 기본적인 웹 게시물 관리
