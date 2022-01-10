@@ -59,7 +59,8 @@ ex00/
     
 ```
 - **Configuration: 2 versions(xml/java)** 
-*버전 변경 및 설정 추가*
+
+*pom.xml 버전 변경 및 설정 추가*
 ```java
 //pom.xml
 // 스프링 프레임워크 버전은 3.1.1로 생성되므로 예제는 5.0.7 버전으로 수정
@@ -148,7 +149,7 @@ ex00/
 </dependency>
 ```
 
-- **java Configuration의 경우**
+- *java Configuration의 경우*
 ```
 <!-- web.xml/spring폴더(root-context.xml,servlet-context.xml) 삭제-->
 <!-- java Config 사용시 pom.xml 수정-->
@@ -522,52 +523,18 @@ log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 	<level value="warn" />
 </logger>
 ```
-
+<br>
+<br>
 ## Part2 스프링 MVC 설정
 ### 1. 스프링 MVC의 기본구조
-//프로젝트 구동은 web.xml 부터 시작 
-//1. ContextLoaderListener (w/ context-param:root-context.xml) 
-//2. root-context.xml 읽음 (context에 bean 생성) 
-//3. DispatcherServlet 서블렛 설정 동작 (w/ init-param:servlet-context.xml)
-//4. servlet-context.xml 읽음 (웹 관련 처리 준비작업 진행 => 이 과정에서 등록된 Bean들은 기존에 만들어진 Bean들과 연동 됨)
+//프로젝트 구동은 
+//0. **web.xml** 부터 시작 
+//1. **ContextLoaderListener** 실행 (w/ context-param:root-context.xml) 
+//2. **root-context.xml**에 정의된 bean 설정 읽음 (context에 bean 생성 : DataSource(jdbc), sqlSessionfactory, txManager, service, mapper, aop 등) 
+//3. **DispatcherServlet**에서 서블렛 설정 동작 (w/ XmlApplicationContext를 이용해서 init-param:servlet-context.xml 로딩) //제일중요!! 웹관련 처리 준비작업!!
+//4. **servlet-context.xml** 설정 읽음 (웹 관련 처리 준비작업 진행(설정:ViewResolver, ResourceHandlers. Bean생성: MultipartResolver & Controller) => 이 과정에서 등록된 Bean들은 기존에 만들어진 Bean들과 연동 됨)
+
 - **환경셋팅(pom.xml, root-context.xml, web.xml - java버전 Part1 셋팅과 동일)**
-*web.xml*
-```java
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-
-	<!-- The definition of the Root Spring Container shared by all Servlets and Filters -->
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/root-context.xml</param-value>
-	</context-param>
-	
-	<!-- Creates the Spring Container shared by all Servlets and Filters -->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
-	<!-- Processes application requests -->
-	<servlet>
-		<servlet-name>appServlet</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-		
-	<servlet-mapping>
-		<servlet-name>appServlet</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
-</web-app>
-
-```
-
 *WebConfig 클래스*
 ```java
 @Configuration
@@ -586,11 +553,9 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	protected String[] getServletMappings() {
 		return new String[] {"/"}; 
 	}
-	
-	
+		
   @Override 
-  protected void customizeRegistration(ServletRegistration.Dynamic
-  registration) {
+  protected void customizeRegistration(ServletRegistration.Dynamic registration) {
   registration.setInitParameter("throwExceptionIfNoHandlerFound", "true"); }
 	 
 }
