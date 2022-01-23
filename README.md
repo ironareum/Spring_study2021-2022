@@ -697,7 +697,18 @@ public class ServletConfig implements WebMvcConfigurer{
 	<groupId>org.springframework</groupId>
 	<artifactId>spring-test</artifactId>
 	<version>${org.springframework-version}</version>
-</dependency>		
+</dependency>	
+
+
+//java 설정시 
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-war-plugin</artifactId>
+	<version>2.5.1</version>
+	<configuration>
+	   <failOnMissingWebXml></failOnMissingWebXml>
+	</configuration>
+</plugin>
 ```
 - web.xml을 이용하는 경우 첨부파일 설정
 web.xml의 설정은 WAS(Tomcat) 자체의 설정일뿐, 스프링에서 업로드 처리는 MultipartResolver라는 타입의 객체를 빈으로 등록해야만 가능함. (@servelt-context.xml)
@@ -727,3 +738,22 @@ web.xml의 설정은 WAS(Tomcat) 자체의 설정일뿐, 스프링에서 업로�
 	</multipart-config>
 </servlet>
 ```
+
+- java 설정시
+```
+//WebConfig.java
+@Override
+protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+	registration.setInitParameter("throwExceptionIfNoHandlerFount", "true");
+	MultipartConfigElement multipartConfig = new MultipartConfigElement("C:\\upload\\temp", 20971520, 41943040, 20971520);
+	registration.setMultipartConfig(multipartConfig);
+}
+
+//ServletConfig
+@Bean
+public MultipartResolver multipartResolver(){
+	StandardServletMultipartResolver resolver = new StandardServletMultipartResolver();
+	return resolver;
+}
+```
+
