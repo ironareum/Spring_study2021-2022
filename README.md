@@ -804,5 +804,8 @@ public MultipartResolver multipartResolver(){
 	```
 
 	
-### 3. ajax를 이용한 파일 업로드
+### 3. ajax를 이용한 파일 업로드 (FormData 객체 이용, IE의 경우 10 이후 버전부터 지원)
 	
+
+
+	//추후 커밋 합치기 해보기 
