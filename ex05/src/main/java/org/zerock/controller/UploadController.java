@@ -3,6 +3,7 @@ package org.zerock.controller;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -61,6 +62,7 @@ public class UploadController {
 		log.info("upload ajax");
 	}
 	
+	
 	/**
 	 * @Author : "IronAreum"
 	 * @Date : 2022. 1. 25.
@@ -73,6 +75,15 @@ public class UploadController {
 		
 		String uploadFolder = "C:\\upload";
 		
+		//make folder --------
+		File uploadPath = new File(uploadFolder, getFolder()); //SimpleDateFormat("yyyy-MM-dd") to (File.seperator)
+		log.info("uploadPath: " + uploadPath);
+		
+		if(uploadPath.exists() == false) {
+			uploadPath.mkdirs(); //mkdirs()는 필요시 부모 디렉토리까지 생성 
+		}
+		//make yyyy/MM/dd folder
+		
 		for(MultipartFile multipartFile : uploadFile) {
 			log.info("--------------------");
 			log.info("Upload File Name: "+ multipartFile.getOriginalFilename());
@@ -84,21 +95,27 @@ public class UploadController {
 			uploadFileName = uploadFileName.substring(uploadFileName.lastIndexOf("\\")+1);
 			log.info("only file name: "+ uploadFileName);
 			
-			File saveFile = new File(uploadFolder, uploadFileName);
+			//중복 방지를 위한 UUID 사용
+			UUID uuid = UUID.randomUUID();  
+			uploadFileName = uuid.toString() + "_" + uploadFileName; //동일한 파일명 업로드 시에도 앞에 UUID를 붙여 덮어쓰기 방지
+			
+			//File saveFile = new File(uploadFolder, uploadFileName);
+			File saveFile = new File(uploadPath, uploadFileName);
 			
 			try {
 				multipartFile.transferTo(saveFile);
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
-		}
+			
+		}// end for 
 		
 	}
 	
 	/**
 	 * @Author : "IronAreum"
 	 * @Date : 2022. 1. 25.
-	 * @Method : 년/월/일 폴더 생성
+	 * @Method : 년/월/일 폴더의 생성
 	 * @return : String
 	 */
 	private String getFolder() {
