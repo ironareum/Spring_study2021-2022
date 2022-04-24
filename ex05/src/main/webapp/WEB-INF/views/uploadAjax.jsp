@@ -5,14 +5,40 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
+<style type="text/css">
+	.uploadResult {
+		width:100%;
+		background-color: gray;
+	}
+	
+	.uploadResult ul{
+		display: flex;
+		flex-flow: row;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.uploadResult ul li{
+		list-style: none;
+		padding: 10px;
+	}
+	
+	.uploadResult ul li img{
+		width: 20px;
+	}
+</style>
 </head>
 <body>
 	<div class="uploadDiv">
 		<input type="file" name="uploadFile" multiple/>
 	</div>
+	
+	<div class="uploadResult">
+		<ul>
+		</ul>
+	</div>
+
 	<button id="uploadBtn">Upload</button>
-
-
 <!-- 
 <script src="https://code.jquery.com/jquery-3.4.1.js"   
 	integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   
@@ -25,6 +51,9 @@
 					
 		var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$"); //정규표현식 참고: https://webclub.tistory.com/95 , https://soooprmx.com/%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D%EC%9D%98-%EA%B0%9C%EB%85%90%EA%B3%BC-%EA%B8%B0%EC%B4%88-%EB%AC%B8%EB%B2%95/
 		var maxSize = 5242880; //5MB
+		
+		var cloneObj = $(".uploadDiv").clone(); 
+		var uploadResult = $(".uploadResult ul"); //업로드파일 결과 리스트
 		
 		//첨부파일 확장자나 크기의 사전처리
 		function checkExtension(fileName, fileSize){
@@ -77,10 +106,29 @@
 				success: function(result){
 					alert("Uploaded");
 					console.log(result);
+					showUploadFile(result);
+					$(".uploadDiv").html(cloneObj.html());
 				}
 			});
 			
 		});
+		
+		function showUploadFile(uploadResultArr){
+			var str = "";
+			
+			$(uploadResultArr).each(function(index, obj){
+				if(!obj.image){
+					str += "<li><img src='/resources/img/attach.png'>" + obj.fileName + "</li>";
+				}else {
+					//str += "<li>"+ obj.fileName + "</li>" ;				
+					var fileCallPath = encodeURIComponent(obj.uploadPath + "/s_" + obj.uuid + "_"+ obj.fileName);
+					
+					str += "<li><img src='/display?fileName=" + fileCallPath +"'>"+obj.fileName+"</li>";
+				}
+			});		
+			uploadResult.append(str);	
+		}
+		
 	});
 </script>
 
