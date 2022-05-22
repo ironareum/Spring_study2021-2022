@@ -31,22 +31,7 @@ import net.coobird.thumbnailator.Thumbnailator;
  * @Author : "IronAreum"
  * @Date : 2022. 1. 25.
  */
-/**
- * @Author : "IronAreum"
- * @Date : 2022. 4. 17.
- */
-/**
- * @Author : "IronAreum"
- * @Date : 2022. 4. 17.
- */
-/**
- * @Author : "IronAreum"
- * @Date : 2022. 4. 17.
- */
-/**
- * @Author : "IronAreum"
- * @Date : 2022. 4. 17.
- */
+
 @Controller
 @Log4j
 public class UploadController {

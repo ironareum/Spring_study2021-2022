@@ -25,7 +25,7 @@
 
 
 	#### 1. 환경설정
-	- 1) pom.xml 환경설정 추가
+	- pom.xml 환경설정 추가
 		```java
 		//pom.xml
 			//서블릿 3.0 이상을 활용하기 위해 서블릿 버전 수정 및 기본적인 사항(Lombok 등) 추가
@@ -97,7 +97,7 @@
 			</plugin>
 		```
 	
-	- 2) web.xml을 이용하는 경우 첨부파일 설정 (java 설정의 경우 web.xml, servlet-context.xml, root-context.xml 파일 사용안함)
+	- web.xml을 이용하는 경우 첨부파일 설정 (java 설정의 경우 web.xml, servlet-context.xml, root-context.xml 파일 사용안함)
 	web.xml의 설정은 WAS(Tomcat) 자체의 설정일뿐, 스프링에서 업로드 처리는 MultipartResolver라는 타입의 객체를 빈으로 등록해야만 가능함. (@servelt-context.xml)
 	
 		```xml
@@ -172,8 +172,9 @@
 				- long getSize(): 업로드되는 파일의 크기
 				- byte[] getBytes(): byte[]로 파일 데이터 반환
 				- InputStream getInputStream(): 파일데이터와 연결된 InputStream을 반환
-				- transferTo(File file): 파일의 저장 **
-				```		
+				- transferTo(File file): 파일의 저장(file에 지정된 파일경로 및 이름으로 ) **
+				```	
+					
 			2) 첨부파일 업로드 처리하는 메서드(POST 방식: /uploadFormAction)
 				```java
 				File saveFile= new File(파일경로, 업로드파일.getOriginalFilename(); //파일경로: C:\\upload
@@ -260,4 +261,136 @@
 <br>
 	
 ### 22. 파일 업로드 상세 처리 
-	####1.
+	####1. 파일의 확장자나 크기의 사전 처리 (웹공격 방지)
+		- 첨부파일의 확장자가 'exe', 'sh', 'zip'등 & 특정 크기 이상의 파일의 경우에는 업로드 제한하는 Js 처리 (파일 확장자의 경우 정규표현식을 이용해서 검사가능)	
+			```js
+			
+			// 파일의 확장자와 크기를 검사하는 함수
+			function checkExtension(fileName, fileSize){} 
+			```
+		- 중복된 이름의 첨부파일 처리 (한 폴더 내 생성파일 수 제한)
+			1) 중복된 이름의 파일처리 해결방법 : 현재시간을 밀리세컨드까지 구분해서 파일 이름을 생성해서 저장하거나, UUID를 이용해서 중복발생 가능성이 거의 없는 문자열 생성하여 처리
+			2) 한 폴더내에 너무 많은 파일생성 문제 해결방법: '년/월/일' 단위의 폴더를 생성해서 파일 저장 
+				- java.io.File에 존재하는 mkdirs() 이용 (필요한 상위 폴더까지 한번에 생성가능)
+		
+		- 중복 방지를 위한 UUID 사용
+			```
+			//파일 이름 생성시 동일한 이름으로 업로드되면 기존 파일을 지우게 되므로 java.util.UUID의 값을 이용해서 처리
+			UUID uuid = UUID.randomUUID();
+			uploadFileName = uuid.toString() + "-" + uploadFileName;
+			File saveFile = new File(uploadPath, uploadFileName);
+			```
+		
+		*File 객체 관련 참고링크: 
+			- File 객체: https://xzio.tistory.com/305
+			- File 생성: https://hianna.tistory.com/588
+			- 특정 디렉토리 File 목록 가져오기: https://mine-it-record.tistory.com/432
+
+	####2. 섬네일 이미지 생성 (일반파일과 이미지 파일 구분)
+		- Thumbnailator 라이브러리 사용 (그외 JDK1.4 부터는 ImageIO, ImgScalr 등이 있음)
+			1) pom.xml에 라이브러리 추가 (https://github.com/coobird/thumbnailator 참고. ver 0.4.8)
+		
+		- Controller
+			1) 업로드된 파일이 이미지 종류의 파일인지 확인 (checkImageType() 메서드 추가 )
+				**약간의 검사를 통해서 업로드 되는 파일의 확장자를 검사하기는 하지만, Ajax로 사용하는 호출은 반드시 브라우저만을 통해서 들어오는 것이 아니므로 확인할 필요가 있음**
+				```java
+				//UploadController 일부
+				private boolean checkImageType(File file){
+					...
+					String contentType = Files.probeContentType(file.toPath());
+					return contentType.starsWith("image"); //이미지 타입 확인
+					...
+					return false; //이미지 타입 아님
+				}
+				```
+				2) 이미지 파일의 경우에는 섬네일 이미지 생성 및 저장
+				```java
+				//이미지 타입인 경우 섬네일 생성하도록 수정 
+				//UploadController 일부 (@uploadAjaxAction)
+					...
+					//check image type file
+					if(checkImageType(saveFile)){
+						FileOutputStram thumbnail = new FileOutputStream(newFile(uploadPath, "s_"+uploadFileName));
+						Thumbnailator.createThumbnail(multipartFile.getInputStream(), thumbnail, 100, 100); //
+						thumbnail.close();									
+					}
+					...
+				```
+	####3. 업로드된 파일의 데이터 반환 (브라우저 쪽에 데이터 반환)
+		- 브라우저로 전송해야 하는 데이터는 다음과 같은 정보를 포함하도록 설계 (별도의 객체를 생성해서 처리하는 방법으로 구현)
+			1) 업로드된 파일의 이름과 원본 파일의 이름
+			2) 파일이 저장된 경로
+			3) 업로드된 파일이 이미지인지 아닌지에 대한 정보
+			
+		- jackson-databind 라이브러리 사용
+			pom.xml에 라이브러리 추가 (jackson.core, jackson.dataformat)
+		
+		- AttachFileDTO 클래스 생성 (아래 변수의 정보를 하나로 묶어서 전달하는 용도로 사용) 
+			```
+			//AttachFileDTO 클래스
+			fileName, uploadPath, uuid, image 변수 설정
+			```
+		- UploadController
+			AttachFileDTO의 리스트를 반환하는 구조로 변경 
+			```
+			@PostMapping(value = "/uploadAjaxAction", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+				@ResponseBody
+				public ResponseEntity<List<AttachFileDTO>> uploadAjaxPost(MultipartFile[] uploadFile){
+					ArrayList<AttachFileDTO> list = new ArrayList<>();
+					...
+					//make yyyy/MM/dd folder
+					for (MultipartFile multipartFile : uploadFile){
+						AttachFileDTO attachDTO = new AttachFileDTO();
+						...
+						//IE has file path
+						attachDTO.setFileName(uploadFileName);
+						...
+						attachDTO.setUuid(uuid.toString());
+						sttachDTO.setUploadPath(uploadFolederPath);
+						...
+						//check image type file
+						attachDTO.setImage(true);
+						...
+						//add to List
+						list.add(attachDTO);
+					}
+					
+					return new ResponseEntity<>(list, HttpStatus.OK);
+				}
+			```
+		- jsp
+			uploadAjax.jsp 의 $.ajax dataType 변경(json)
+			
+			
+### 23. 브라우저에서 섬네일 처리 
+	####1. `<input type-'file'>`의 초기화
+		- `<input type-'file'>`은 다른 DOM 요소들과 조금 다르게 readonly라 안쪽의 내용을 수정할 수 없기 때문에 별도의 방법으로 초기화 시켜서 또 다른 첨부파일을 추가할 수 있도록 만들어야함
+			```jsp
+			//uploadAjax.jsp 일부
+			var cloneObj = $(".uploadDiv").clone(); //업로드 하기전 아무 내용이 없는 div 부분 복사 => 업로드 완료 후 복사된 객체를 div 내에 다시 추가해서 첨부파일 부분 초기화 시킴(파일 업로드 또 할수있게 화면 조정).
+			
+			$("#uploadBtn").on("click", function(e){
+				var formData = new FormData();
+			}
+			...
+			
+			
+			$.ajax({
+				...
+				success : function(result){
+					console.log(result);
+					
+					$(".uploadDiv").html(cloneObj.html()); //업로드 화면 부분 초기화
+				}
+			});
+			
+			```		
+			
+	####2. 업로드된 이미지 처리
+		**업로드 된 결과는 json 형태로 받아왔기 때문에 이를 이용해서 홤녀에 적절한 섬네일을 보여주거나 화면에 파일 아이콘 등을 보여주어서 결과를 피드백 해줄 필요가 있음.**
+		- 
+	
+	
+	
+	
+	
