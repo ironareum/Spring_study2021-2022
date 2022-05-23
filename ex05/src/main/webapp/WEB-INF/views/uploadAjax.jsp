@@ -24,8 +24,37 @@
 	}
 	
 	.uploadResult ul li img{
-		width: 20px;
+		width: 40px;
 	}
+	
+	.uploadResult ul li span{
+		color: white;
+	}
+	
+	.bigPictureWrapper {
+		position: absolute;
+		display: none;
+		justify-content: center;
+		align-items: center;
+		top: 0%;
+		width: 100%;
+		height: 100%;
+		background-color: grey;
+		z-index: 100;
+		background: rgba(255,255,255,0.5);
+	}
+	
+	.bigPicture {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.bigPicture img {
+		width: 600px;
+	}
+	
 </style>
 </head>
 <body>
@@ -37,8 +66,14 @@
 		<ul>
 		</ul>
 	</div>
-
+	
 	<button id="uploadBtn">Upload</button>
+	
+	<div class="bigPictureWrapper">
+		<div class="bigPicture">
+		</div>
+	</div>
+	
 <!-- 
 <script src="https://code.jquery.com/jquery-3.4.1.js"   
 	integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   
@@ -47,6 +82,15 @@
 -->
 <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
 <script>
+	//ready 바깥에 작성한 이유: 나중에 <a> 태그에서 직접 해당 함수를 호출 할 수 있는 방식으로 작성하기 위함.
+	function showImage(fileCallPath){
+		//alert(fileCallPath);
+		
+		$(".bicPictureWrapper").css("display", "flex").show();
+		$(".bicPicture").html("<img src='/display?fileName=" + encodeURI(fileCallPath)+ "'>")
+		.animate({width: '100%', height: '100%'}, 1000);
+	}
+
 	$(document).ready(function(){
 					
 		var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$"); //정규표현식 참고: https://webclub.tistory.com/95 , https://soooprmx.com/%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D%EC%9D%98-%EA%B0%9C%EB%85%90%EA%B3%BC-%EA%B8%B0%EC%B4%88-%EB%AC%B8%EB%B2%95/
@@ -113,21 +157,48 @@
 			
 		});
 		
+		//원본이미지 클릭
+		$(".bigPictureWrapper").on("click",function(e){
+			//이미지 점점 작게 애니메이션
+			$(".bigPicture").animate({width: '0%', height: '0%'}, 1000);
+			
+			//1초 후 이미지 사라짐
+			setTimeout(()=>{ //=>는 IE11에서는 동작 안함..!
+				$(this).hide();
+			}, 1000);
+			
+			//IE11 식 코드
+			/*
+			setTimeout(function(){
+				$(".bigPrictureWrapper").hide();
+			},1000);
+			*/
+		});
+		
+		
 		function showUploadFile(uploadResultArr){
 			var str = "";
 			
 			$(uploadResultArr).each(function(index, obj){
-				if(!obj.image){
-					str += "<li><img src='/resources/img/attach.png'>" + obj.fileName + "</li>";
+				if(!obj.image){	
+					var fileCallPath = encodeURIComponent(obj.uploadPath +"/"+obj.uuid+"_"+obj.fileName);
+					str += "<li><a href='/download?fileName="+fileCallPath+"'><img src='resources/img/attach.png'>" + obj.fileName + "</a></li>";
 				}else {
 					//str += "<li>"+ obj.fileName + "</li>" ;				
 					var fileCallPath = encodeURIComponent(obj.uploadPath + "/s_" + obj.uuid + "_"+ obj.fileName);
 					
-					str += "<li><img src='/display?fileName=" + fileCallPath +"'>"+obj.fileName+"</li>";
+					//RegExp(/\\/g)가 /'원화''원화'/ 로 보이기 때문에 replace 해줌. 
+					//정규 표현식 뒤의 "g"는 전체 문자열을 탐색해서 모든 일치를 반환하도록 지정하는 전역 탐색 플래그 
+					var originPath = obj.uploadPath + "\\" + obj.uuid + "_" + obj.fileName;
+					originPath = originPath.replace(new RegExp(/\\/g) , "/"); 
+					
+					str += "<li><a href=\"javascript:showImage(\'" + originPath+"\')\"><img src='/display?fileName=" + fileCallPath +"'>"+obj.fileName+"</a></li>";
 				}
 			});		
 			uploadResult.append(str);	
 		}
+		
+		
 		
 	});
 </script>
