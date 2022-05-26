@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -116,14 +117,16 @@ public class UploadController {
 	@ResponseBody
 	public ResponseEntity<List<AttachDTO>> uploadAjaxAction(MultipartFile[] uploadFile) {
 		log.info("update ajax post....");
+		
 		List<AttachDTO> list = new ArrayList<>();
-
 		String uploadFolder = "C:\\upload";
 		String uploadFolderPath = getFolder(); //저장할 폴더 경로생성
 
 		// make folder --------
 		File uploadPath = new File(uploadFolder, uploadFolderPath); // uploadFolderPath: SimpleDateFormat("yyyy-MM-dd")																	
+		
 		log.info("uploadPath: " + uploadPath);
+		
 		if (uploadPath.exists() == false) {
 			uploadPath.mkdirs(); // mkdirs()는 필요시 부모 디렉토리까지 생성. make yyyy/MM/dd folder
 		}		
@@ -146,6 +149,7 @@ public class UploadController {
 			try {
 				// File saveFile = new File(uploadFolder, uploadFileName);
 				File saveFile = new File(uploadPath, uploadFileName);
+				
 				// 파일 저장
 				multipartFile.transferTo(saveFile);
 
@@ -157,10 +161,8 @@ public class UploadController {
 					attachDTO.setImage(true);
 					FileOutputStream thumbnail = new FileOutputStream(new File(uploadPath, "s_" + uploadFileName));
 					Thumbnailator.createThumbnail(multipartFile.getInputStream(), thumbnail, 100, 100);
-
 					thumbnail.close();
 				}
-
 				list.add(attachDTO);
 
 			} catch (Exception e) {
@@ -234,6 +236,33 @@ public class UploadController {
 			e.printStackTrace();
 		}
 		return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+	}
+	
+	
+	//첨부파일 삭제 
+	@PostMapping("/deleteFile")
+	@ResponseBody
+	public ResponseEntity<String> deleteFile(String fileName, String type){
+		log.info("deleteFile: " + fileName);
+		
+		File file;
+		
+		try {
+			file = new File("c:\\upload\\" + URLDecoder.decode(fileName, "UTF-8"));
+			file.delete(); //파일 삭제 (이미지 파일일시, 섬네일 삭제)
+			
+			//이미지 파일일 경우
+			if(type.contentEquals("image")) {
+				String largeFileName = file.getAbsolutePath().replace("s_", ""); //섬네일 파일 -> 오리지널 원본 파일명으로 변경				
+				log.info("largerFileName: "+ largeFileName);				
+				file = new File(largeFileName);
+				file.delete(); //원본 파일 삭제
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}		
+		return new ResponseEntity<>("deleted", HttpStatus.OK);
 	}
 	
 	
