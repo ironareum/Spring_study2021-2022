@@ -144,53 +144,53 @@
 	/********************** 
 	* ajax 댓글처리 테스트 (s) * 
 	***********************/
-	console.log("=========");
+	/* console.log("=========");
 	console.log("JS TEST");
 	
 	var bnoValue = '<c:out value="${board.bno}"/>';
 	console.log("bno: ", bnoValue);
 	
-	/* 댓글 삽입 */
+	//댓글 삽입 
 	replyService.add(
 		{reply:"JS TEST", replyer: "tester", bno: bnoValue},
 		function(result){
-			alert("RESULT: "+ result);
+			//alert("RESULT: "+ result);
 		},
 		function(err){
-			alert("error: insert");
+			//alert("error: insert");
 		});
 	
-	/*  댓글 리스트 조회 */	
+	//댓글 리스트 조회 	
 	replyService.getList({bno:bnoValue, page: 1}, function(list){
 		for(var i = 0, len = list.length || 0; i < len; i++ ){
 			console.log(list[i]);
 		}
 	});
 	
-	/* 댓글 삭제 */
+	//댓글 삭제
 	replyService.remove(24, function(result){
 		console.log(result);
 		if(result === 'success'){
-			alert("Removed");
+			//alert("Removed");
 		}
 	}, function(err){
-		alert("Error : remove");
+		//alert("Error : remove");
 	}); 
 	
-	/* 댓글 수정 */
+	//댓글 수정
 	replyService.update({rno: 54, bno: bnoValue, reply: "수정되고 있어??????????????????"}
 	, function(result){
 		console.log("update result: "+ result);
-		alert("수정 완료..." + result ); }
+		//alert("수정 완료..." + result ); }
 	, function(err){
-		alert("Error : modify");
+		//alert("Error : modify");
 	});
 	
-	/* 단일 댓글 조회 */
+	//단일 댓글 조회 
 	replyService.get(42, function(data){
 		console.log("단일댓글 data: ",data);
 	});
-
+ */
 </script>
 <script type="text/javascript">
 	$(document).ready(function(){
