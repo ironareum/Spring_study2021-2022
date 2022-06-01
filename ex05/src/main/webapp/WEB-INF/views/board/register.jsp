@@ -75,7 +75,7 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             
-                        	<form action="/board/register" method="post">
+                        	<form role="form" action="/board/register" method="post">
                         		<div class="form-group">
                         			<label for="title">Title</label>
                         			<input class="form-control" type="text" name="title"/>
@@ -138,11 +138,27 @@
 $(document).ready(function(e){
 	
 	var formObj = $("form[role='form']");
+	var cloneObj = $(".uploadDiv").clone(); 
+	console.log("form[role='form'] => " + formObj);
 	
 	$("button[type='submit']").on("click", function(e){
 		e.preventDefault();
 		
 		console.log("submit clicked");
+		
+		var str ="";
+		
+		$(".uploadResult ul li").each(function(i, obj){
+			var jobj = $(obj);
+			console.dir(jobj);
+			
+			str += "<input type='hidden' name='attachList["+i+"].fileName' value='"+jobj.data("filename")+"'>";
+			str += "<input type='hidden' name='attachList["+i+"].uuid' value='"+jobj.data("uuid")+"'>";
+			str += "<input type='hidden' name='attachList["+i+"].uploadPath' value='"+jobj.data("path")+"'>";
+			str += "<input type='hidden' name='attachList["+i+"].fileType' value='"+jobj.data("type")+"'>";
+		});
+		
+		formObj.append(str).submit();
 	});
 	
 	
@@ -173,10 +189,12 @@ $(document).ready(function(e){
 			
 			//image type
 			if(obj.image){	
-				//파일경로 인코딩
+				//파일경로 인코딩, 첨부파일의 정보를 
 				var fileCallPath = encodeURIComponent(obj.uploadPath + "/s_" + obj.uuid + "_"+ obj.fileName);
 				
-				str += "<li><div>";
+				str += "<li data-path='"+ obj.uploadPath +"' data-uuid='"+ obj.uuid +"' ";
+				str +=	" data-filename='" + obj.fileName +"' data-type='"+ obj.image +"'>"; 
+				str += 	"<div>";
 				str += 		"<span> "+ obj.fileName + "</span>";
 				str += 		"<button type='button' data-file=\'" + fileCallPath +"\' data-type='image' "; 
 				str += 			" class='btn btn-warning btn-circle'><i class='fa fa-times'></i></button><br>";
@@ -188,7 +206,9 @@ $(document).ready(function(e){
 				var fileCallPath = encodeURIComponent(obj.uploadPath + "/" + obj.uuid + "_"+ obj.fileName);
 				var fileLink = fileCallPath.replace(new RegExp(/\\/g), "/");
 				
-				str += "<li><div>";
+				str += "<li data-path='"+ obj.uploadPath +"' data-uuid='"+ obj.uuid +"' ";
+				str +=	" data-filename='" + obj.fileName +"' data-type='"+ obj.image +"'>"; 
+				str += 	"<div>";
 				str += 		"<span> "+ obj.fileName + "</span>";
 				str += 		"<button type='button' data-file=\'" + fileCallPath +"\' data-type='file' "; 
 				str += 			" class='btn btn-warning btn-circle'><i class='fa fa-times'></i></button><br>";
@@ -227,6 +247,7 @@ $(document).ready(function(e){
 				//alert("Uploaded");
 				console.log(result);
 				showUploadResult(result); //업로드 결과 처리함수 
+				//$(".uploadDiv").html(cloneObj.html());
 			}
 		});	
 	});
@@ -250,6 +271,7 @@ $(document).ready(function(e){
 			success: function(result){
 				alert(result);
 				targetLi.remove();
+				//$(".uploadDiv").html(cloneObj.html());
 			}
 		});
 	});
