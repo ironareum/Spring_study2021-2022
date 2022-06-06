@@ -208,21 +208,27 @@ public class UploadController {
 		}
 		
 		String resourceName = resource.getFilename();
+		log.info("resourName: "+ resourceName);
+		
 		//remove UUID
 		String resourceOriginalName = resourceName.substring(resourceName.indexOf("_")+1);
-		//log.info("resourceName: " + resourceName);
+		log.info("resourceOriginalName: " + resourceOriginalName);
 		
 		HttpHeaders headers = new HttpHeaders();
+		
 		try {
 			String downloadName = null;
+			
 			if(userAgent.contains("Trident")) { //Trident: IE브라우저의 엔진이름 
 				log.info("IE browser");
 				downloadName = URLEncoder.encode(resourceName, "UTF-8").replaceAll("\\", " ");
 				log.info("IE downloadName: " + downloadName);
+			
 			}else if(userAgent.contains("Edge")) {
 				log.info("Edge browser");
 				downloadName = URLEncoder.encode(resourceName, "UTF-8");
 				log.info("Edge name: " + downloadName);
+			
 			}else {
 				log.info("Chrome browser");
 				downloadName = new String(resourceName.getBytes("UTF-8"), "ISO-8859-1");
@@ -231,7 +237,7 @@ public class UploadController {
 			
 			//Content-Disposition: https://lannstark.tistory.com/8
 			headers.add("Content-Disposition", 
-						"attachment; filenmae="+ downloadName);
+						"attachment; filename="+ downloadName);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
