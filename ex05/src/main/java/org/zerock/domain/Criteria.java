@@ -14,10 +14,10 @@ public class Criteria {
 	//pagination 
 	private int pageNum;
 	private int amount;
-	
 	//검색조건
 	private String type;
 	private String keyword;
+	
 	
 	public Criteria() {
 		this(1,10);
