@@ -237,7 +237,8 @@
 		var liObj = $(this);
 		
 		var path = encodeURIComponent(liObj.data("path")+"/"+liObj.data("uuid")+"_"+liObj.data("filename"));
-		
+		console.log("liObj.data('path'): " + liObj.data("path"));
+		console.log("path : "+ path);
 		if(liObj.data("type")){
 			showImage(path.replace(new RegExp(/\\/g), "/"));
 		}else{
@@ -245,8 +246,9 @@
 			self.location = "/download?fileName="+path
 		}
 	});
-	/* 이미지 클릭시 크게보는 애니메이션 (작동안함 소스 확인필요 ) & 이미지 다시 누르면 크게보기가 사라지는 애니메이션 함수생성 필요 */
-	function showIamge(fileCallPath){
+	
+	/* 2022-06-06 추후 보완작업 필요: 첨부문서 다운로드시, 저장이름 기존 파일명과 동일하게 출력되도록 소스 수정필요 & 이미지파일 확장자 동일하게 다운로드 하도록 소스 수정필요*/
+	function showImage(fileCallPath){
 		alert(fileCallPath);
 		$(".bigPictureWrapper").css("display", "flex").show();
 		$(".bigPicture")
@@ -254,6 +256,13 @@
 		.animate({width:'100%', height: '100%'}, 1000);
 		
 	}
+	
+	$(".bigPictureWrapper").on("click", function(e){
+		$(".bigPicture").animate({width:'0%', height: '0%'}, 1000);
+		setTimeout(function(){
+			$(".bigPictureWrapper").hide();
+		}, 1000);
+	});
 </script>
 <script>
 	$(document).ready(function(){
