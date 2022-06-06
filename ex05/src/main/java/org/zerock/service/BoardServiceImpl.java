@@ -20,9 +20,12 @@ import lombok.extern.log4j.Log4j;
 public class BoardServiceImpl implements BoardService{
 	
 	//spring 4.3 이상에서 자동처리
+	
+	//게시물 mapper
 	@Setter(onMethod_ =@Autowired)
 	private BoardMapper mapper;
 	
+	//첨부파일 mapper
 	@Setter(onMethod_ =@Autowired)
 	private BoardAttachMapper attachMapper;
 	
@@ -49,14 +52,41 @@ public class BoardServiceImpl implements BoardService{
 		log.info("get..........."+bno);
 		return mapper.read(bno);
 	}
-
+	
+	
+	
+	/*게시물 수정 
+	 * 첨부파일의 경우: 
+	 * 1) 해당 게시물의 모든 첨부파일 목록을 삭제하고, 다시 첨부파일 목록을 추가하는 형태로 처리 
+	 * 	  => 문제점: 데이터베이스 상에는 문제가 없는데, 실제 파일이 업로드된 폴더에는 삭제된 파일이 남아있음. 
+	 *    => 해결: 주기적으로 파일과 데이터베이스를 비교하는 등의 방법을 활용해서 처리. 
+	 */
+	@Transactional
 	@Override
 	public boolean modify(BoardVO board) {
-		log.info("modify - serviceImpl");
-		log.info(board);
-		return mapper.update(board) == 1;
+		log.info("modify..... " + board);
+		
+		//모든 첨부파일 목록 삭제 @DB
+		attachMapper.deleteAll(board.getBno());
+		
+		//게시물 업데이트
+		boolean modifyResult = mapper.update(board) ==1;
+		
+		//첨부파일 정보 attachList에 주입
+		if(modifyResult && board.getAttachList() != null 
+				&& board.getAttachList().size()>0) {
+			board.getAttachList().forEach(attach -> {
+				attach.setBno(board.getBno());
+				attachMapper.insert(attach);
+			});
+		}
+		
+		//return mapper.update(board) == 1;
+		return modifyResult;
 	}
 
+	
+	
 	@Transactional
 	@Override
 	public boolean remove(Long bno) {

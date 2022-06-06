@@ -80,6 +80,7 @@ public class BoardController {
 		model.addAttribute("board", service.get(bno));
 	}
 	
+	
 	@PostMapping("/modify")
 	public String modify(BoardVO board, RedirectAttributes rttr, @ModelAttribute("cri") Criteria cri) {
 		log.info("modify (post): " + board);

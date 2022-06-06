@@ -162,7 +162,9 @@ $(document).ready(function(e){
 	});
 	
 	
-	//input type=file 내용이 변경되는것을 감지하려 업로드 처리 
+	
+	
+	//첨부파일 추가  
 	var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
 	var maxSize = 5242880; //5MB
 	
@@ -178,6 +180,40 @@ $(document).ready(function(e){
 		}
 		return true;
 	}
+	
+	//input type=file 내용이 변경되는것을 감지하려 업로드 처리 
+	$("input[type='file']").change(function(e){
+		var formData = new FormData();
+		
+		var inputFile = $("input[name='uploadFile']");
+		var files = inputFile[0].files; //업로드된 파일
+		
+		for(var i=0; i<files.length; i++){
+			if(!checkExtension(files[i].name, files[i].size)){
+				return false;
+			}
+			formData.append("uploadFile", files[i]);
+		}
+		
+		//첨부파일 데이터는 formData에 추가한뒤 Ajax를 통해서 formData 자체를 전송. 이때 processData와 contentType은 반드시 false 여야함.
+		$.ajax({
+			url: '/uploadAjaxAction',
+			processData: false,
+			contentType: false,
+			data: formData,
+			type: 'POST',
+			dataType: 'json',
+			success: function(result){
+				//alert("Uploaded");
+				console.log(result);
+				showUploadResult(result); //업로드 결과 처리함수 
+				//$(".uploadDiv").html(cloneObj.html());
+			}
+		});	
+	});
+	
+	
+	
 	
 	//업로드 결과화면
 	function showUploadResult(uploadResultArr){
@@ -222,35 +258,8 @@ $(document).ready(function(e){
 		uplaodUL.append(str);
 	}
 	
-	$("input[type='file']").change(function(e){
-		var formData = new FormData();
-		
-		var inputFile = $("input[name='uploadFile']");
-		var files = inputFile[0].files; //업로드된 파일
-		
-		for(var i=0; i<files.length; i++){
-			if(!checkExtension(files[i].name, files[i].size)){
-				return false;
-			}
-			formData.append("uploadFile", files[i]);
-		}
-		
-		//첨부파일 데이터는 formData에 추가한뒤 Ajax를 통해서 formData 자체를 전송. 이때 processData와 contentType은 반드시 false 여야함.
-		$.ajax({
-			url: '/uploadAjaxAction',
-			processData: false,
-			contentType: false,
-			data: formData,
-			type: 'POST',
-			dataType: 'json',
-			success: function(result){
-				//alert("Uploaded");
-				console.log(result);
-				showUploadResult(result); //업로드 결과 처리함수 
-				//$(".uploadDiv").html(cloneObj.html());
-			}
-		});	
-	});
+	
+	
 	
 	//첨부파일 삭제
 	$(".uploadResult").on("click", "button", function(e){
