@@ -82,4 +82,5 @@ alter table tbl_attach add constraint fk_board_attach foreign key (bno) referenc
 
 
 
-select * from tbl_attach;
+select * from tbl_attach where bno ='2097197';
+select * from tbl_board where bno ='2097197';
