@@ -23,7 +23,7 @@
 	</delete>
 	
 	<select id="getOldFiles" resultType="org.zerock.domain.BoardAttachVO">
-		select * from tbl_attach where uplaodpath = to_char(sysdate -1, 'yyyy\mm\dd')
+		select * from tbl_attach where uploadPath = to_char(sysdate -1, 'yyyy\mm\dd')
 	</select>
 	
 </mapper>

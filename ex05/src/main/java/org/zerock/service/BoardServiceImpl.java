@@ -77,6 +77,7 @@ public class BoardServiceImpl implements BoardService{
 				&& board.getAttachList().size()>0) {
 			board.getAttachList().forEach(attach -> {
 				attach.setBno(board.getBno());
+				//첨부파일 목록 insert
 				attachMapper.insert(attach);
 			});
 		}
