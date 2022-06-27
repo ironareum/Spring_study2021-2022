@@ -104,13 +104,18 @@ public class FileCheckTask {
 
 			log.warn("================================================");
 			log.warn("DB에 있는 파일목록 -> 파일경로로 변환 완료. ");
-			log.warn(fileListPaths);
+			log.warn("fileListPaths : " + fileListPaths);
 			log.warn("================================================");
 			
 			fileListPaths.forEach(p -> log.warn("DB에 적재된 첨부파일 경로 : "+p));
 		
 		} catch (NullPointerException e) {
+			log.warn(".");
+			log.warn(".");
+			log.warn(".");
+			log.warn("================================================");
 			log.info("DB에 조회 할 파일이 없습니다.");
+			log.warn("================================================");
 			return;
 		}
 		
@@ -136,27 +141,42 @@ public class FileCheckTask {
 				for(File file : removeFiles) {
 					log.info("삭제할 파일 경로 : "+file.getAbsolutePath());
 					log.info("삭제할 파일명 : " + file.getName());
-					file.delete();
+					file.delete();	
 				}
+				log.warn("================================================");
+				log.warn("");
+				log.warn("");
+				log.warn("");
 			}else {
+				log.warn("");
+				log.warn("");
+				log.warn("");
+				log.warn("================================================");
 				log.info("DB에 해당날짜의 파일이 없습니다.");
 				
 				//해당날짜 디렉토리에 파일 존재여부 확인 
 				File[] targetFile = targetDir.listFiles();
 				if(targetFile.length > 0) {
 					log.info("해당날짜 디렉토리 비우기......... ");
+					log.warn("================================================");
 					for(File f: targetFile) {
 						log.info("삭제할 파일명 : " + f.getName());
 						f.delete();
 						//log.info(sysdate + " "+ f.getName()+" 파일 삭제 완료.");
 					}
+					log.warn("================================================");
 					log.info("해당날짜 디렉토리 비우기 [완료]");
+					log.warn("================================================");
+					log.warn("");
+					log.warn("");
+					log.warn("");
 				}
 			}
 			
 		} catch (NullPointerException e) {
 			log.warn("================================================");
 			log.info("디렉토리에 조회 할 파일이 없습니다.");
+			log.warn("================================================");
 			return;
 		}
 			
