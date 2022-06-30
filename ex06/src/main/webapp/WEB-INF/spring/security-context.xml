@@ -8,6 +8,29 @@
 	<!-- 스프링 시큐리티가 동작하기 위해서는 Authentication Manager라는 존재와 스프링 시큐리티의 시작지점이 필요. 아래설정. -->
 	<security:http>
 		<security:form-login/>
+
+		<!-- 접근제한 설정 -->
+		<security:intercept-url pattern="/sample/all" access="permitAll" />
+		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')" />
+		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')" />
+		
+		<!-- 접근제한 시 지정한 페이지로 이동  -->
+		<security:access-denied-handler error-page="/accessError"/>
 	</security:http>
-	<security:authentication-manager></security:authentication-manager>
+	
+	<!-- 인증과 권한처리 -->
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<!-- 인증과 권한에 대한 실제처리  -->
+			<security:user-service>
+				<!-- 임시방편: password encoding 에러를 피하기 위해 (원래는 PasswordEncoder 필요)
+					https://spring.io/blog/2017/11/01/spring-security-5-0-0-rcl-released#password-storage-format 
+					인코딩 처리 없이 사용하기위해 패스워드 앞에 {noop} 추가				-->
+				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>
+				<security:user name="admin" password="{noop}admin" authorities="ROLE_MANAGER, ROLE_MEMBER"/>
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+
 </beans>
